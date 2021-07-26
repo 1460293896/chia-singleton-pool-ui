@@ -11,14 +11,13 @@ import {SnippetService} from './snippet.service';
   providedIn: 'root'
 })
 export class AccountService {
-  public static poolPublicKeyStorageKey = 'poolPublicKey';
+  public static singletonGenesisStorageKey = 'singletonGenesis';
   public static authTokenStorageKey = 'authToken';
 
   public account = null;
   public isLoading = false;
   public isAuthenticating = false;
   public isUpdatingAccount = false;
-  public isLeavingPool = false;
 
   constructor(
     private statsService: StatsService,
@@ -28,17 +27,14 @@ export class AccountService {
     private snippetService: SnippetService,
   ) {}
 
-  async login({ poolPublicKey }) {
-    poolPublicKey = poolPublicKey.trim();
-    if (!poolPublicKey.startsWith('0x')) {
-      poolPublicKey = `0x${poolPublicKey}`;
-    }
-    const account = await this.getAccount({ poolPublicKey });
+  async login({ singletonGenesis }) {
+    singletonGenesis = singletonGenesis.trim();
+    const account = await this.getAccount({ accountIdentifier: singletonGenesis });
     if (account === null) {
-      this.toastService.showErrorToast(this.snippetService.getSnippet('account-service.login.error.invalid-farmer', poolPublicKey));
+      this.toastService.showErrorToast(this.snippetService.getSnippet('account-service.login.error.invalid-farmer', singletonGenesis));
       return false;
     }
-    this.localStorageService.setItem(AccountService.poolPublicKeyStorageKey, poolPublicKey);
+    this.localStorageService.setItem(AccountService.singletonGenesisStorageKey, singletonGenesis);
     await this.updateAccount();
     this.toastService.showSuccessToast(this.snippetService.getSnippet('account-service.login.success'));
 
@@ -46,22 +42,22 @@ export class AccountService {
   }
 
   logout() {
-    this.removePoolPublicKey();
+    this.removeSingletonGenesis();
     this.removeAuthToken();
     this.account = null;
     this.toastService.showSuccessToast(this.snippetService.getSnippet('account-service.logout.success'));
   }
 
-  get poolPublicKey() {
-    return this.localStorageService.getItem(AccountService.poolPublicKeyStorageKey);
+  get singletonGenesis() {
+    return this.localStorageService.getItem(AccountService.singletonGenesisStorageKey);
   }
 
-  removePoolPublicKey() {
-    this.localStorageService.removeItem(AccountService.poolPublicKeyStorageKey);
+  removeSingletonGenesis() {
+    this.localStorageService.removeItem(AccountService.singletonGenesisStorageKey);
   }
 
-  get havePoolPublicKey() {
-    return !!this.poolPublicKey;
+  get haveSingletonGenesis() {
+    return !!this.singletonGenesis;
   }
 
   get haveAccount() {
@@ -69,18 +65,18 @@ export class AccountService {
   }
 
   async updateAccount() {
-    this.account = await this.getAccount({ poolPublicKey: this.poolPublicKey });
+    this.account = await this.getAccount({ accountIdentifier: this.singletonGenesis });
     if (!this.haveAccount) {
-      this.removePoolPublicKey();
+      this.removeSingletonGenesis();
       this.removeAuthToken();
     }
   }
 
-  async getAccount({ poolPublicKey }) {
+  async getAccount({ accountIdentifier }) {
     this.isLoading = true;
     let account = null;
     try {
-      account = await this.statsService.getAccount({ poolPublicKey });
+      account = await this.statsService.getAccount({ accountIdentifier });
       if (account) {
         this.patchAccount(account);
       }
@@ -99,9 +95,6 @@ export class AccountService {
 
   patchAccount(account) {
     account.pendingRounded = (new BigNumber(account.pending)).decimalPlaces(12, BigNumber.ROUND_FLOOR).toNumber();
-    if (account.collateral) {
-      account.collateralRounded = (new BigNumber(account.collateral)).decimalPlaces(12, BigNumber.ROUND_FLOOR).toNumber();
-    }
   }
 
   get authToken() {
@@ -117,13 +110,13 @@ export class AccountService {
   }
 
   async authenticate({ signature, message }) {
-    if (!this.havePoolPublicKey) {
+    if (!this.haveSingletonGenesis) {
       return;
     }
     this.isAuthenticating = true;
     try {
       const { accessToken } = await this.statsService.authenticate({
-        poolPublicKey: this.poolPublicKey,
+        accountIdentifier: this.singletonGenesis,
         signature,
         message,
       });
@@ -140,48 +133,11 @@ export class AccountService {
     this.isUpdatingAccount = true;
     try {
       await this.statsService.updateAccountName({
-        poolPublicKey: this.poolPublicKey,
+        accountIdentifier: this.singletonGenesis,
         authToken: this.authToken,
         newName,
       });
       await this.updateAccount();
-    } finally {
-      this.isUpdatingAccount = false;
-    }
-  }
-
-  async leavePool({ leaveForEver }) {
-    if (!this.haveAuthToken) {
-      return;
-    }
-    this.isUpdatingAccount = true;
-    this.isLeavingPool = true;
-    try {
-      await this.statsService.leavePool({
-        poolPublicKey: this.poolPublicKey,
-        authToken: this.authToken,
-        leaveForEver,
-      });
-      await this.updateAccount();
-    } finally {
-      this.isUpdatingAccount = false;
-      this.isLeavingPool = false;
-    }
-  }
-
-  async rejoinPool() {
-    if (!this.haveAuthToken) {
-      return;
-    }
-    this.isUpdatingAccount = true;
-    try {
-      await this.statsService.rejoinPool({
-        poolPublicKey: this.poolPublicKey,
-        authToken: this.authToken,
-      });
-      await this.updateAccount();
-    } catch (err) {
-      this.toastService.showErrorToast(err.message);
     } finally {
       this.isUpdatingAccount = false;
     }
@@ -194,7 +150,7 @@ export class AccountService {
     this.isUpdatingAccount = true;
     try {
       await this.statsService.updateAccountMinimumPayout({
-        poolPublicKey: this.poolPublicKey,
+        accountIdentifier: this.singletonGenesis,
         authToken: this.authToken,
         minimumPayout: newMinimumPayout,
       });

@@ -24,11 +24,20 @@ export class PoolsProvider {
       apiUrl: 'https://api2.foxypool.io',
       algorithm: 'Proof of Spacetime',
     },{
+      group: 'CHIA',
+      name: 'Foxy-Pool CHIA (Testnet)',
+      url: 'https://chia-testnet.foxypool.io',
+      poolIdentifier: 'chia-testnet',
+      hostnames: ['chia-testnet.foxypool.io', 'localhost'],
+      apiUrl: 'https://api2.foxypool.io',
+      algorithm: 'Proof of Spacetime',
+      hidden: true,
+    },{
       group: 'FLAX',
       name: 'Foxy-Pool FLAX (OG)',
       url: 'https://flax-og.foxypool.io',
       poolIdentifier: 'flax-og',
-      hostnames: ['flax-og.foxypool.io', 'localhost'],
+      hostnames: ['flax-og.foxypool.io'],
       apiUrl: 'https://api2.foxypool.io',
       algorithm: 'Proof of Spacetime',
     },{

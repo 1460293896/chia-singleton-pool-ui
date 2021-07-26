@@ -6,11 +6,11 @@ import Capacity from '../capacity';
 import {faCircleNotch, faInfoCircle, faUserCheck} from '@fortawesome/free-solid-svg-icons';
 import {AccountService} from '../account.service';
 import * as moment from 'moment';
-import {AuthenticationModalComponent} from '../authentication-modal/authentication-modal.component';
 import {UpdateNameModalComponent} from '../update-name-modal/update-name-modal.component';
 import BigNumber from 'bignumber.js';
-import {LeavePoolModalComponent} from '../leave-pool-modal/leave-pool-modal.component';
 import {UpdateMinimumPayoutModalComponent} from '../update-minimum-payout-modal/update-minimum-payout-modal.component';
+import {PoolsProvider} from '../pools.provider';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-my-farmer',
@@ -18,17 +18,14 @@ import {UpdateMinimumPayoutModalComponent} from '../update-minimum-payout-modal/
   styleUrls: ['./my-farmer.component.scss']
 })
 export class MyFarmerComponent implements OnInit {
-  @ViewChild(AuthenticationModalComponent) authenticationModal;
   @ViewChild(UpdateNameModalComponent) updateNameModal;
-  @ViewChild(LeavePoolModalComponent) leavePoolModal;
   @ViewChild(UpdateMinimumPayoutModalComponent) updateMinimumPayoutModal;
 
   public poolConfig:any = {};
   public exchangeStats:any = {};
-  public poolPublicKeyInput = null;
+  public singletonGenesisInput = null;
   public faCircleNotch = faCircleNotch;
   public faUserCheck = faUserCheck;
-  public faInfoCircle = faInfoCircle;
 
   private poolEc = 0;
   private dailyRewardPerPib = 0;
@@ -38,6 +35,9 @@ export class MyFarmerComponent implements OnInit {
     public accountService: AccountService,
     private statsService: StatsService,
     private toastService: ToastService,
+    private poolsProvider: PoolsProvider,
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
   ) {}
 
   async ngOnInit() {
@@ -53,28 +53,57 @@ export class MyFarmerComponent implements OnInit {
       this.dailyRewardPerPib = rewardStats.dailyRewardPerPiB;
     });
     setInterval(async () => {
-      if (!this.accountService.havePoolPublicKey) {
+      if (!this.accountService.haveSingletonGenesis) {
         return;
       }
       await this.accountService.updateAccount();
     }, 3 * 60 * 1000);
 
-    if (!this.accountService.havePoolPublicKey) {
+    if (this.isLoginRequest()) {
+      await this.loginAndAuthFromQueryParams();
+      await this.router.navigate([]);
+    }
+    if (!this.accountService.haveSingletonGenesis) {
       return;
     }
     await this.accountService.updateAccount();
   }
 
-  async login() {
-    if (!this.poolPublicKeyInput) {
-      this.toastService.showErrorToast(this.snippetService.getSnippet('my-farmer-component.pool-pk-input.error.missing'));
-      return;
-    }
-    const success: boolean = await this.accountService.login({ poolPublicKey: this.poolPublicKeyInput });
+  async loginAndAuthFromQueryParams() {
+    const singletonGenesis = this.activatedRoute.snapshot.queryParamMap.get('launcher_id');
+    const message = this.activatedRoute.snapshot.queryParamMap.get('authentication_token');
+    const signature = this.activatedRoute.snapshot.queryParamMap.get('signature');
+    const success: boolean = await this.accountService.login({ singletonGenesis });
     if (!success) {
       return;
     }
-    this.poolPublicKeyInput = null;
+    try {
+      await this.accountService.authenticate({ message, signature });
+      this.toastService.showSuccessToast(this.snippetService.getSnippet('authentication-modal.success'));
+    } catch (err) {
+      this.toastService.showErrorToast(err.message);
+      return;
+    }
+  }
+
+  isLoginRequest() {
+    const singletonGenesis = this.activatedRoute.snapshot.queryParamMap.get('launcher_id');
+    const message = this.activatedRoute.snapshot.queryParamMap.get('authentication_token');
+    const signature = this.activatedRoute.snapshot.queryParamMap.get('signature');
+
+    return singletonGenesis && message && signature;
+  }
+
+  async login() {
+    if (!this.singletonGenesisInput) {
+      this.toastService.showErrorToast(this.snippetService.getSnippet('my-farmer-component.singleton-genesis-input.error.missing'));
+      return;
+    }
+    const success: boolean = await this.accountService.login({ singletonGenesis: this.singletonGenesisInput });
+    if (!success) {
+      return;
+    }
+    this.singletonGenesisInput = null;
   }
 
   getFormattedCapacity(capacityInGiB) {
@@ -110,50 +139,12 @@ export class MyFarmerComponent implements OnInit {
     return ecInPib.multipliedBy(this.dailyRewardPerPib).toFixed(4);
   }
 
-  get canLeavePool() {
-    if (!this.accountService.account) {
-      return false;
-    }
-    const account = this.accountService.account;
-
-    return !account.hasLeftThePool && !account.isCheating
-  }
-
-  get canRejoinPool() {
-    if (!this.accountService.account) {
-      return false;
-    }
-    const account = this.accountService.account;
-    if (!account.hasLeftThePool) {
-      return false;
-    }
-
-    return account.collateral === undefined || account.collateral !== '0';
-  }
-
-  async authenticate() {
-    this.authenticationModal.openModal();
-  }
-
   async updateName() {
     this.updateNameModal.openModal();
   }
 
-  async leavePool() {
-    this.leavePoolModal.openModal();
-  }
-
   async updateMinimumPayout() {
     this.updateMinimumPayoutModal.openModal();
-  }
-
-  async rejoinPool() {
-    try {
-      await this.accountService.rejoinPool();
-      this.toastService.showSuccessToast(this.snippetService.getSnippet('my-farmer-component.rejoin-pool.success'));
-    } catch (err) {
-      this.toastService.showErrorToast(err.message);
-    }
   }
 
   getCoinValueAsFiat(value) {
@@ -171,5 +162,9 @@ export class MyFarmerComponent implements OnInit {
     }
 
     return value * this.exchangeStats.rates.usd;
+  }
+
+  get authDocsUrl() {
+    return `https://docs.foxypool.io/proof-of-spacetime/foxy-pool/pools/${this.poolsProvider.poolIdentifier}/authenticate/`;
   }
 }

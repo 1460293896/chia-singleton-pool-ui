@@ -22,10 +22,8 @@ import {WINDOW_PROVIDERS} from "./window.provider";
 import { EmptyStateComponent } from './empty-state/empty-state.component';
 import { LoadingStateComponent } from './loading-state/loading-state.component';
 import { MyFarmerComponent } from './my-farmer/my-farmer.component';
-import { AuthenticationModalComponent } from './authentication-modal/authentication-modal.component';
 import {ClipboardModule} from 'ngx-clipboard';
 import { UpdateNameModalComponent } from './update-name-modal/update-name-modal.component';
-import { LeavePoolModalComponent } from './leave-pool-modal/leave-pool-modal.component';
 import { UpdateMinimumPayoutModalComponent } from './update-minimum-payout-modal/update-minimum-payout-modal.component';
 
 @NgModule({
@@ -41,9 +39,7 @@ import { UpdateMinimumPayoutModalComponent } from './update-minimum-payout-modal
     EmptyStateComponent,
     LoadingStateComponent,
     MyFarmerComponent,
-    AuthenticationModalComponent,
     UpdateNameModalComponent,
-    LeavePoolModalComponent,
     UpdateMinimumPayoutModalComponent,
   ],
   imports: [

@@ -1,7 +1,7 @@
 <div class="row">
-  <div class="col-12" *ngIf="!accountService.havePoolPublicKey">
+  <div class="col-12" *ngIf="!accountService.haveSingletonGenesis">
     <div class="row justify-content-center">
-      <input type="text" class="form-control" placeholder="{{snippetService.getSnippet('my-farmer-component.pool-pk-input.placeholder')}}" [(ngModel)]="poolPublicKeyInput" style="width: 32em;margin-right: 0.5rem;">
+      <input type="text" class="form-control" placeholder="{{snippetService.getSnippet('my-farmer-component.singleton-genesis-input.placeholder')}}" [(ngModel)]="singletonGenesisInput" style="width: 32em;margin-right: 0.5rem;">
       <button class="btn btn-success" style="margin-left: 0.5rem;" (click)="login()">
         <fa-icon *ngIf="accountService.isLoading" [icon]="faCircleNotch" [spin]="true"></fa-icon>
         <span *ngIf="accountService.isLoading"> {{snippetService.getSnippet('my-farmer-component.login-button.label-logging-in')}}</span>
@@ -9,12 +9,12 @@
       </button>
     </div>
   </div>
-  <div class="col-12" *ngIf="accountService.havePoolPublicKey && !accountService.haveAccount && accountService.isLoading">
+  <div class="col-12" *ngIf="accountService.haveSingletonGenesis && !accountService.haveAccount && accountService.isLoading">
     <div class="row justify-content-center">
       <app-loading-state></app-loading-state>
     </div>
   </div>
-  <div class="col-12" *ngIf="accountService.havePoolPublicKey && accountService.haveAccount">
+  <div class="col-12" *ngIf="accountService.haveSingletonGenesis && accountService.haveAccount">
     <div class="row">
       <div class="p-1 col-md-12 col-lg-9 col-xxl-20">
         <div class="row row-without-margin">
@@ -76,10 +76,10 @@
                 </div>
                 <div class="row">
                   <div class="col-2 card-font-size">
-                    {{snippetService.getSnippet('my-farmer-component.payout-address-card.pool-public-key')}}
+                    {{snippetService.getSnippet('my-farmer-component.payout-address-card.singleton-genesis')}}
                   </div>
                   <div class="col-10 card-font-size" style="text-align: end">
-                    {{accountService.account.poolPublicKey}}
+                    {{accountService.account.singleton.genesis}}
                   </div>
                 </div>
               </div>
@@ -87,16 +87,6 @@
           </div>
         </div>
         <div class="row row-without-margin">
-          <div class="p-1 col-md-3 col-lg-3 col-xxl-6" *ngIf="accountService.account.collateral">
-            <div class="card">
-              <div class="card-header text-align-center">
-                <h5>{{snippetService.getSnippet('my-farmer-component.collateral-balance-card.title')}}</h5>
-              </div>
-              <div class="card-body text-align-center card-font-size">
-                <span placement="bottom" ngbTooltip="{{getCoinValueAsFiat(accountService.account.collateralRounded).toFixed(2)}} USD">{{accountService.account.collateralRounded}} {{poolConfig.ticker}}</span>
-              </div>
-            </div>
-          </div>
           <div class="p-1 col-md-3 col-lg-3 col-xxl-6">
             <div class="card">
               <div class="card-header text-align-center">
@@ -139,9 +129,10 @@
                 <h5>{{snippetService.getSnippet('my-farmer-component.manage-account-card.title')}}</h5>
               </div>
               <div class="card-body">
-                <div class="row justify-content-center" *ngIf="!accountService.haveAuthToken" >
-                  <button class="btn btn-success" (click)="authenticate()">{{snippetService.getSnippet('my-farmer-component.manage-account-card.authenticate')}}</button>
-                  &nbsp;&nbsp;<fa-icon style="font-size: 1.5rem" [icon]="faInfoCircle" placement="bottom" [ngbTooltip]="snippetService.getSnippet('my-farmer-component.manage-account-card.auth-info')"></fa-icon>
+                <div class="row justify-content-center" *ngIf="!accountService.haveAuthToken">
+                  <div class="col-12">
+                    <span [innerHTML]="snippetService.getSnippet('my-farmer-component.manage-account-card.auth-info', authDocsUrl)"></span>
+                  </div>
                 </div>
                 <div class="text-align-center" *ngIf="accountService.haveAuthToken">
                   <div class="p-1 row">
@@ -159,16 +150,6 @@
                       <button class="btn btn-outline-light" (click)="updateMinimumPayout()">{{snippetService.getSnippet('my-farmer-component.manage-account-card.action.update-minimum-payout')}}</button>
                     </div>
                   </div>
-                  <div class="p-1 row" *ngIf="canLeavePool">
-                    <div class="col-12">
-                      <button class="btn btn-outline-light" (click)="leavePool()">{{snippetService.getSnippet('my-farmer-component.manage-account-card.action.leave-pool')}}</button>
-                    </div>
-                  </div>
-                  <div class="p-1 row" *ngIf="canRejoinPool">
-                    <div class="col-12">
-                      <button class="btn btn-outline-light" (click)="rejoinPool()">{{snippetService.getSnippet('my-farmer-component.manage-account-card.action.rejoin-pool')}}</button>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -178,7 +159,5 @@
     </div>
   </div>
 </div>
-<app-authentication-modal></app-authentication-modal>
 <app-update-name-modal></app-update-name-modal>
-<app-leave-pool-modal></app-leave-pool-modal>
 <app-update-minimum-payout-modal></app-update-minimum-payout-modal>

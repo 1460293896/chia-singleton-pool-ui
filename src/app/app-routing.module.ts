@@ -15,7 +15,8 @@ const routes: Routes = [
   { path: 'my-farmer', component: MyFarmerComponent, pathMatch: 'full', data: { titlePrefixSnippet: 'my-farmer' } },
   { path: 'notices', loadChildren: () => import('./notices/notices.module').then(m => m.NoticesModule) },
   { path: 'events', loadChildren: () => import('./events/events.module').then(m => m.EventsModule) },
-  { path: '**', redirectTo: '' }
+  { path: 'login', redirectTo: 'my-farmer' },
+  { path: '**', redirectTo: '' },
 ];
 
 @NgModule({

@@ -82,7 +82,7 @@ export class HeaderComponent implements OnInit {
       return [];
     }
 
-    return this.poolsProvider.pools.filter(pool => pool.url !== this.poolUrl);
+    return this.poolsProvider.pools.filter(pool => pool.url !== this.poolUrl).filter(pool => !pool.hidden);
   }
 
   getPool(index) {

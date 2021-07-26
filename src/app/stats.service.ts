@@ -111,32 +111,24 @@ export class StatsService {
     this.exchangeStats.next(exchangeStats);
   }
 
-  getAccount({ poolPublicKey}) {
-    return this.apiService.getAccount({ poolIdentifier: this.poolIdentifier, poolPublicKey });
+  getAccount({ accountIdentifier }) {
+    return this.apiService.getAccount({ poolIdentifier: this.poolIdentifier, accountIdentifier });
   }
 
-  authenticate({ poolPublicKey, message, signature }): any {
-    return this.requestWithError(this.apiService.authenticateAccount({ poolIdentifier: this.poolIdentifier, poolPublicKey, message, signature }));
+  authenticate({ accountIdentifier, message, signature }): any {
+    return this.requestWithError(this.apiService.authenticateAccount({ poolIdentifier: this.poolIdentifier, accountIdentifier, message, signature }));
   }
 
-  async updateAccountName({ poolPublicKey, authToken, newName }) {
-    return this.requestWithError(this.apiService.updateAccountName({ poolIdentifier: this.poolIdentifier, poolPublicKey, authToken, newName }));
+  async updateAccountName({ accountIdentifier, authToken, newName }) {
+    return this.requestWithError(this.apiService.updateAccountName({ poolIdentifier: this.poolIdentifier, accountIdentifier, authToken, newName }));
   }
 
-  updateAccountDistributionRatio({ poolPublicKey, authToken, newDistributionRatio }) {
-    return this.requestWithError(this.apiService.updateAccountDistributionRatio({ poolIdentifier: this.poolIdentifier, poolPublicKey, authToken, newDistributionRatio }));
+  updateAccountDistributionRatio({ accountIdentifier, authToken, newDistributionRatio }) {
+    return this.requestWithError(this.apiService.updateAccountDistributionRatio({ poolIdentifier: this.poolIdentifier, accountIdentifier, authToken, newDistributionRatio }));
   }
 
-  updateAccountMinimumPayout({ poolPublicKey, authToken, minimumPayout }) {
-    return this.requestWithError(this.apiService.updateAccountMinimumPayout({ poolIdentifier: this.poolIdentifier, poolPublicKey, authToken, minimumPayout }));
-  }
-
-  leavePool({ poolPublicKey, authToken, leaveForEver }) {
-    return this.requestWithError(this.apiService.leavePool({ poolIdentifier: this.poolIdentifier, poolPublicKey, authToken, leaveForEver }));
-  }
-
-  rejoinPool({ poolPublicKey, authToken }) {
-    return this.requestWithError(this.apiService.rejoinPool({ poolIdentifier: this.poolIdentifier, poolPublicKey, authToken }));
+  updateAccountMinimumPayout({ accountIdentifier, authToken, minimumPayout }) {
+    return this.requestWithError(this.apiService.updateAccountMinimumPayout({ poolIdentifier: this.poolIdentifier, accountIdentifier, authToken, minimumPayout }));
   }
 
   async requestWithError(requestPromise) {

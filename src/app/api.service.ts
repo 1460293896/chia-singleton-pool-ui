@@ -45,14 +45,14 @@ export class ApiService {
     return data;
   }
 
-  async getAccount({ poolIdentifier, poolPublicKey }) {
-    const { data } = await this.client.get(`${poolIdentifier}/account/${poolPublicKey}`);
+  async getAccount({ poolIdentifier, accountIdentifier }) {
+    const { data } = await this.client.get(`${poolIdentifier}/account/${accountIdentifier}`);
 
     return data;
   }
 
-  async authenticateAccount({ poolIdentifier, poolPublicKey, message, signature }) {
-    const { data } = await this.client.post(`${poolIdentifier}/account/${poolPublicKey}/authenticate`, {
+  async authenticateAccount({ poolIdentifier, accountIdentifier, message, signature }) {
+    const { data } = await this.client.post(`${poolIdentifier}/account/${accountIdentifier}/authenticate`, {
       message,
       signature,
     });
@@ -60,8 +60,8 @@ export class ApiService {
     return data;
   }
 
-  async updateAccountName({ poolIdentifier, poolPublicKey, authToken, newName }) {
-    const { data } = await this.client.post(`${poolIdentifier}/account/${poolPublicKey}/name`, {
+  async updateAccountName({ poolIdentifier, accountIdentifier, authToken, newName }) {
+    const { data } = await this.client.post(`${poolIdentifier}/account/${accountIdentifier}/name`, {
       newName,
     }, {
       headers: { Authorization: `Bearer ${authToken}` },
@@ -70,8 +70,8 @@ export class ApiService {
     return data;
   }
 
-  async updateAccountDistributionRatio({ poolIdentifier, poolPublicKey, authToken, newDistributionRatio }) {
-    const { data } = await this.client.post(`${poolIdentifier}/account/${poolPublicKey}/distribution-ratio`, {
+  async updateAccountDistributionRatio({ poolIdentifier, accountIdentifier, authToken, newDistributionRatio }) {
+    const { data } = await this.client.post(`${poolIdentifier}/account/${accountIdentifier}/distribution-ratio`, {
       newDistributionRatio,
     }, {
       headers: { Authorization: `Bearer ${authToken}` },
@@ -80,28 +80,10 @@ export class ApiService {
     return data;
   }
 
-  async updateAccountMinimumPayout({ poolIdentifier, poolPublicKey, authToken, minimumPayout }) {
-    const { data } = await this.client.post(`${poolIdentifier}/account/${poolPublicKey}/minimum-payout`, {
+  async updateAccountMinimumPayout({ poolIdentifier, accountIdentifier, authToken, minimumPayout }) {
+    const { data } = await this.client.post(`${poolIdentifier}/account/${accountIdentifier}/minimum-payout`, {
       minimumPayout,
     }, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
-
-    return data;
-  }
-
-  async leavePool({ poolIdentifier, poolPublicKey, authToken, leaveForEver }) {
-    const { data } = await this.client.post(`${poolIdentifier}/account/${poolPublicKey}/leave-pool`, {
-      leaveForEver,
-    }, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
-
-    return data;
-  }
-
-  async rejoinPool({ poolIdentifier, poolPublicKey, authToken }) {
-    const { data } = await this.client.post(`${poolIdentifier}/account/${poolPublicKey}/rejoin-pool`, undefined, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
 
