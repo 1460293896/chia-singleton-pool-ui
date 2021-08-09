@@ -167,4 +167,8 @@ export class MyFarmerComponent implements OnInit {
   get authDocsUrl() {
     return `https://docs.foxypool.io/proof-of-spacetime/foxy-pool/pools/${this.poolsProvider.poolIdentifier}/authenticate/`;
   }
+
+  getBlockExplorerAddressLink(address) {
+    return this.poolConfig.blockExplorerAddressUrlTemplate.replace('#ADDRESS#', address);
+  }
 }
