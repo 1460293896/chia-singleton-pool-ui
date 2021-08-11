@@ -12,7 +12,7 @@ export class PoolsProvider {
       name: 'Foxy-Pool CHIA',
       url: 'https://chia.foxypool.io',
       poolIdentifier: 'chia',
-      hostnames: ['chia.foxypool.io'],
+      hostnames: ['chia.foxypool.io', 'localhost'],
       apiUrl: 'https://api2.foxypool.io',
       algorithm: 'Proof of Spacetime',
     },{
@@ -20,7 +20,7 @@ export class PoolsProvider {
       name: 'Foxy-Pool CHIA (OG)',
       url: 'https://chia-og.foxypool.io',
       poolIdentifier: 'chia-og',
-      hostnames: ['chia-og.foxypool.io', 'localhost'],
+      hostnames: ['chia-og.foxypool.io'],
       apiUrl: 'https://api2.foxypool.io',
       algorithm: 'Proof of Spacetime',
     },{
@@ -28,7 +28,7 @@ export class PoolsProvider {
       name: 'Foxy-Pool CHIA (Testnet)',
       url: 'https://chia-testnet.foxypool.io',
       poolIdentifier: 'chia-testnet',
-      hostnames: ['chia-testnet.foxypool.io', 'localhost'],
+      hostnames: ['chia-testnet.foxypool.io'],
       apiUrl: 'https://api2.foxypool.io',
       algorithm: 'Proof of Spacetime',
       hidden: true,
