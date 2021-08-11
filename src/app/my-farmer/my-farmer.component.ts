@@ -11,6 +11,7 @@ import BigNumber from 'bignumber.js';
 import {UpdateMinimumPayoutModalComponent} from '../update-minimum-payout-modal/update-minimum-payout-modal.component';
 import {PoolsProvider} from '../pools.provider';
 import {ActivatedRoute, Router} from '@angular/router';
+import {RatesService} from '../rates.service';
 
 @Component({
   selector: 'app-my-farmer',
@@ -38,6 +39,7 @@ export class MyFarmerComponent implements OnInit {
     private poolsProvider: PoolsProvider,
     private activatedRoute: ActivatedRoute,
     private router: Router,
+    public ratesService: RatesService,
   ) {}
 
   async ngOnInit() {
@@ -145,23 +147,6 @@ export class MyFarmerComponent implements OnInit {
 
   async updateMinimumPayout() {
     this.updateMinimumPayoutModal.openModal();
-  }
-
-  getCoinValueAsFiat(value) {
-    if (!this.exchangeStats || !this.exchangeStats.rates) {
-      return 0;
-    }
-    if (!value) {
-      return 0;
-    }
-    if (this.poolConfig.isTestnet) {
-      return 0;
-    }
-    if (!this.exchangeStats.rates.usd) { // TODO: user configurable
-      return 0;
-    }
-
-    return value * this.exchangeStats.rates.usd;
   }
 
   get authDocsUrl() {

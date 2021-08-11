@@ -20,7 +20,7 @@ export class PoolsProvider {
       name: 'Foxy-Pool CHIA (OG)',
       url: 'https://chia-og.foxypool.io',
       poolIdentifier: 'chia-og',
-      hostnames: ['chia-og.foxypool.io'],
+      hostnames: ['chia-og.foxypool.io', 'localhost'],
       apiUrl: 'https://api2.foxypool.io',
       algorithm: 'Proof of Spacetime',
     },{
