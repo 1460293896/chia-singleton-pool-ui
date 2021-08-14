@@ -7,7 +7,7 @@ import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
 Sentry.init({
-  dsn: 'https://f1ed3ebc92ba45d99ebc558a547e362d@o236153.ingest.sentry.io/5906348',
+  dsn: 'https://58148d01d33a45c8a2972820de724edd@o236153.ingest.sentry.io/5906348',
   integrations: [
     new Integrations.BrowserTracing({
       tracingOrigins: ['localhost', 'https://api2.foxypool.io/api'],
