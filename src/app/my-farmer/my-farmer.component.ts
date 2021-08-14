@@ -1,13 +1,15 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
+import {faCircleNotch, faUserCheck} from '@fortawesome/free-solid-svg-icons';
+import * as Sentry from '@sentry/angular';
+import * as moment from 'moment';
+import BigNumber from 'bignumber.js';
+
 import {StatsService} from '../stats.service';
 import {ToastService} from '../toast.service';
 import {SnippetService} from '../snippet.service';
 import Capacity from '../capacity';
-import {faCircleNotch, faInfoCircle, faUserCheck} from '@fortawesome/free-solid-svg-icons';
 import {AccountService} from '../account.service';
-import * as moment from 'moment';
 import {UpdateNameModalComponent} from '../update-name-modal/update-name-modal.component';
-import BigNumber from 'bignumber.js';
 import {UpdateMinimumPayoutModalComponent} from '../update-minimum-payout-modal/update-minimum-payout-modal.component';
 import {PoolsProvider} from '../pools.provider';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -68,6 +70,7 @@ export class MyFarmerComponent implements OnInit {
     if (!this.accountService.haveSingletonGenesis) {
       return;
     }
+    Sentry.setUser({ id: this.accountService.singletonGenesis });
     await this.accountService.updateAccount();
   }
 
