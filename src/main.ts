@@ -8,7 +8,7 @@ import { environment } from './environments/environment';
 import { gitCommitHash } from './environments/config';
 
 Sentry.init({
-  dsn: 'https://58148d01d33a45c8a2972820de724edd@o236153.ingest.sentry.io/5906348',
+  dsn: 'https://58148d01d33a45c8a2972820de724edd@o236153.ingest.sentry.io/5906425',
   release: gitCommitHash || null,
   integrations: [
     new Integrations.BrowserTracing({
