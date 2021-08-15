@@ -6,6 +6,7 @@ import { Integrations } from '@sentry/tracing';
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 import { gitCommitHash } from './environments/config';
+import {Event, EventHint} from '@sentry/angular';
 
 Sentry.init({
   dsn: 'https://58148d01d33a45c8a2972820de724edd@o236153.ingest.sentry.io/5906425',
@@ -26,6 +27,17 @@ Sentry.init({
     'Request aborted',
     'Request failed',
   ],
+  beforeSend(event: Event, hint?: EventHint): PromiseLike<Event | null> | Event | null {
+    const error = hint.originalException;
+    if (
+      (error && typeof error === 'string' && error.indexOf('Request failed') !== -1)
+      || (error && error instanceof Error && error.message && error.message.indexOf('Request failed') !== -1)
+    ) {
+      return null;
+    }
+
+    return event;
+  }
 });
 
 if (environment.production) {
