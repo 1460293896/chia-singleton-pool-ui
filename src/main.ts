@@ -8,6 +8,16 @@ import { environment } from './environments/environment';
 import { gitCommitHash } from './environments/config';
 import {Event, EventHint} from '@sentry/angular';
 
+const ignoreErrors = [
+  'Request failed with status code',
+  'Network request failed',
+  'NetworkError',
+  'Network Error',
+  'Request aborted',
+  'Request failed',
+  'timeout of 0ms exceeded',
+];
+
 Sentry.init({
   dsn: 'https://58148d01d33a45c8a2972820de724edd@o236153.ingest.sentry.io/5906425',
   release: gitCommitHash || null,
@@ -19,19 +29,12 @@ Sentry.init({
   ],
   tracesSampleRate: 0,
   allowUrls: ['foxypool.io'],
-  ignoreErrors: [
-    'Request failed with status code',
-    'Network request failed',
-    'NetworkError',
-    'Network Error',
-    'Request aborted',
-    'Request failed',
-  ],
+  ignoreErrors,
   beforeSend(event: Event, hint?: EventHint): PromiseLike<Event | null> | Event | null {
     const error = hint.originalException;
     if (
-      (error && typeof error === 'string' && error.indexOf('Request failed') !== -1)
-      || (error && error instanceof Error && error.message && error.message.indexOf('Request failed') !== -1)
+      (error && typeof error === 'string' && ignoreErrors.some(snip => error.indexOf(snip) !== -1))
+      || (error && error instanceof Error && error.message && ignoreErrors.some(snip => error.message.indexOf(snip) !== -1))
     ) {
       return null;
     }
