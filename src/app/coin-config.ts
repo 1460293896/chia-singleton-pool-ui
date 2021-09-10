@@ -1,13 +1,15 @@
 const config = {
   CHIA: {
-    clientSoftwareDownloadUrl: 'https://github.com/foxypool/chia-blockchain',
-    clientSoftwareName: 'chia-blockchain',
     cliCommandPrefix: 'chia',
+    hdKeyPoolPublicKeyPath: 'm/12381/8444/1/0',
   },
   FLAX: {
-    clientSoftwareDownloadUrl: 'https://github.com/foxypool/flax-blockchain',
-    clientSoftwareName: 'flax-blockchain',
     cliCommandPrefix: 'flax',
+    hdKeyPoolPublicKeyPath: 'm/12381/8444/1/0',
+  },
+  CHIVES: {
+    cliCommandPrefix: 'chives',
+    hdKeyPoolPublicKeyPath: 'm/12381/9699/1/0',
   },
 };
 
