@@ -45,7 +45,7 @@ export class PoolsProvider {
       name: 'Foxy-Pool CHIVES (OG)',
       url: 'https://chives-og.foxypool.io',
       poolIdentifier: 'chives-og',
-      hostnames: ['chives-og.foxypool.io', 'localhost'],
+      hostnames: ['chives-og.foxypool.io'],
       apiUrl: 'https://api2.foxypool.io',
       algorithm: 'Proof of Spacetime',
     },{
