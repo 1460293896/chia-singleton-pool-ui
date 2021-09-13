@@ -49,6 +49,14 @@ export class PoolsProvider {
       apiUrl: 'https://api2.foxypool.io',
       algorithm: 'Proof of Spacetime',
     },{
+      group: 'HDDCOIN',
+      name: 'Foxy-Pool HDDCOIN (OG)',
+      url: 'https://hddcoin-og.foxypool.io',
+      poolIdentifier: 'hddcoin-og',
+      hostnames: ['hddcoin-og.foxypool.io'],
+      apiUrl: 'https://api2.foxypool.io',
+      algorithm: 'Proof of Spacetime',
+    },{
       group: 'BHD',
       name: 'Foxy-Pool BHD',
       url: 'https://bhd.foxypool.io',
