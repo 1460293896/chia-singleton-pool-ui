@@ -115,6 +115,10 @@ export class StatsService {
     return this.apiService.getAccount({ poolIdentifier: this.poolIdentifier, accountIdentifier });
   }
 
+  getAccountHistoricalStats({ accountIdentifier}) {
+    return this.apiService.getAccountHistoricalStats({ poolIdentifier: this.poolIdentifier, accountIdentifier });
+  }
+
   authenticate({ accountIdentifier, message, signature }): any {
     return this.requestWithError(this.apiService.authenticateAccount({ poolIdentifier: this.poolIdentifier, accountIdentifier, message, signature }));
   }

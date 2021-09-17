@@ -7,6 +7,7 @@ import {ToastService} from './toast.service';
 import {BigNumber} from 'bignumber.js';
 import {SnippetService} from './snippet.service';
 import * as Sentry from '@sentry/angular';
+import {BehaviorSubject} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,7 @@ export class AccountService {
   public static authTokenStorageKey = 'authToken';
 
   public account = null;
+  public accountHistoricalStats = new BehaviorSubject<any[]>([]);
   public isLoading = false;
   public isAuthenticating = false;
   public isUpdatingAccount = false;
@@ -38,6 +40,7 @@ export class AccountService {
     this.localStorageService.setItem(AccountService.singletonGenesisStorageKey, singletonGenesis);
     Sentry.setUser({ id: singletonGenesis });
     await this.updateAccount();
+    await this.updateAccountHistoricalStats();
     this.toastService.showSuccessToast(this.snippetService.getSnippet('account-service.login.success'));
 
     return true;
@@ -47,6 +50,7 @@ export class AccountService {
     this.removeSingletonGenesis();
     this.removeAuthToken();
     this.account = null;
+    this.accountHistoricalStats.next([]);
     Sentry.setUser(null);
     this.toastService.showSuccessToast(this.snippetService.getSnippet('account-service.logout.success'));
   }
@@ -72,7 +76,12 @@ export class AccountService {
     if (!this.haveAccount) {
       this.removeSingletonGenesis();
       this.removeAuthToken();
+      this.accountHistoricalStats.next([]);
     }
+  }
+
+  async updateAccountHistoricalStats() {
+    this.accountHistoricalStats.next(await this.getAccountHistoricalStats({ accountIdentifier: this.singletonGenesis }));
   }
 
   async getAccount({ accountIdentifier }) {
@@ -94,6 +103,18 @@ export class AccountService {
     }
 
     return account;
+  }
+
+  async getAccountHistoricalStats({ accountIdentifier }) {
+    this.isLoading = true;
+    let accountHistoricalStats = [];
+    try {
+      accountHistoricalStats = await this.statsService.getAccountHistoricalStats({ accountIdentifier });
+    } finally {
+      this.isLoading = false;
+    }
+
+    return accountHistoricalStats;
   }
 
   patchAccount(account) {
