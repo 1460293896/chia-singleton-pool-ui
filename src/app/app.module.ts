@@ -28,6 +28,7 @@ import {ClipboardModule} from 'ngx-clipboard';
 import { UpdateNameModalComponent } from './update-name-modal/update-name-modal.component';
 import { UpdateMinimumPayoutModalComponent } from './update-minimum-payout-modal/update-minimum-payout-modal.component';
 import {NgxEchartsModule} from 'ngx-echarts';
+import { PoolHistoryComponent } from './pool-history/pool-history.component';
 
 @NgModule({
   declarations: [
@@ -44,6 +45,7 @@ import {NgxEchartsModule} from 'ngx-echarts';
     MyFarmerComponent,
     UpdateNameModalComponent,
     UpdateMinimumPayoutModalComponent,
+    PoolHistoryComponent,
   ],
   imports: [
     BrowserModule,
