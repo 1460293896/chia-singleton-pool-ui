@@ -1,5 +1,5 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {faCircleNotch, faUserCheck} from '@fortawesome/free-solid-svg-icons';
+import {faCircleNotch, faUserCheck, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import * as Sentry from '@sentry/angular';
 import * as moment from 'moment';
 import BigNumber from 'bignumber.js';
@@ -29,6 +29,7 @@ export class MyFarmerComponent implements OnInit {
   public exchangeStats:any = {};
   public singletonGenesisInput = null;
   public faCircleNotch = faCircleNotch;
+  public faInfoCircle = faInfoCircle;
   public faUserCheck = faUserCheck;
 
   public ecChartOptions: EChartsOption;
