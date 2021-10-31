@@ -159,8 +159,14 @@ export class BlocksWonComponent implements OnInit {
     if (block.isRewardClaimed) {
       return this.snippetService.getSnippet('blocks-won-component.pending');
     }
+    if (!block.rewardClaimTx) {
+      return this.snippetService.getSnippet('blocks-won-component.unclaimed');
+    }
+    if (block.rewardClaimTx.state === 'IN_MEMPOOL') {
+      return this.snippetService.getSnippet('blocks-won-component.in-mempool');
+    }
 
-    return this.snippetService.getSnippet('blocks-won-component.unclaimed');
+    return this.snippetService.getSnippet('blocks-won-component.pending');
   }
 
   getBlockEffort(block) {

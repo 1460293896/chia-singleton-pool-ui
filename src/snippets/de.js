@@ -33,6 +33,7 @@ export default {
   'blocks-won-component.header.winner': 'Gewinner',
   'blocks-won-component.no-blocks-won-yet': 'Noch keine Blöcke gewonnen!',
   'blocks-won-component.pending': 'Wartend',
+  'blocks-won-component.in-mempool': 'Im Mempool',
   'blocks-won-component.title': 'Kürzlich Gewonnene Blöcke',
   'blocks-won-component.unclaimed': 'Unbeansprucht',
   'dashboard-component.latest-notices.title': 'Aktuelle Meldungen',
