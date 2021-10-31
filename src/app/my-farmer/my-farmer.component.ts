@@ -116,7 +116,9 @@ export class MyFarmerComponent implements OnInit {
       },
       legend: {
         data: [
-          this.snippetService.getSnippet('my-farmer-component.shares-chart.shares.name'),
+          this.snippetService.getSnippet('my-farmer-component.shares-chart.invalid-shares.name'),
+          this.snippetService.getSnippet('my-farmer-component.shares-chart.stale-shares.name'),
+          this.snippetService.getSnippet('my-farmer-component.shares-chart.valid-shares.name'),
           this.snippetService.getSnippet('my-farmer-component.shares-chart.difficulty.name'),
           this.snippetService.getSnippet('my-farmer-component.shares-chart.partials.name'),
         ],
@@ -157,7 +159,24 @@ export class MyFarmerComponent implements OnInit {
       series: [{
         data: [],
         type: 'bar',
-        name: this.snippetService.getSnippet('my-farmer-component.shares-chart.shares.name'),
+        stack: 'shares',
+        name: this.snippetService.getSnippet('my-farmer-component.shares-chart.invalid-shares.name'),
+        color: '#ee6666',
+        large: true,
+        barWidth: 6,
+      }, {
+        data: [],
+        type: 'bar',
+        stack: 'shares',
+        name: this.snippetService.getSnippet('my-farmer-component.shares-chart.stale-shares.name'),
+        color: '#c98a1a',
+        large: true,
+        barWidth: 6,
+      }, {
+        data: [],
+        type: 'bar',
+        stack: 'shares',
+        name: this.snippetService.getSnippet('my-farmer-component.shares-chart.valid-shares.name'),
         color: '#037ffc',
         large: true,
         barWidth: 6,
@@ -198,7 +217,9 @@ export class MyFarmerComponent implements OnInit {
         },
         legend: {
           data: [
-            this.snippetService.getSnippet('my-farmer-component.shares-chart.shares.name'),
+            this.snippetService.getSnippet('my-farmer-component.shares-chart.invalid-shares.name'),
+            this.snippetService.getSnippet('my-farmer-component.shares-chart.stale-shares.name'),
+            this.snippetService.getSnippet('my-farmer-component.shares-chart.valid-shares.name'),
             this.snippetService.getSnippet('my-farmer-component.shares-chart.difficulty.name'),
             this.snippetService.getSnippet('my-farmer-component.shares-chart.partials.name'),
           ],
@@ -209,7 +230,11 @@ export class MyFarmerComponent implements OnInit {
           name: this.snippetService.getSnippet('my-farmer-component.shares-chart.difficulty.name'),
         }],
         series: [{
-          name: this.snippetService.getSnippet('my-farmer-component.shares-chart.shares.name'),
+          name: this.snippetService.getSnippet('my-farmer-component.shares-chart.invalid-shares.name'),
+        }, {
+          name: this.snippetService.getSnippet('my-farmer-component.shares-chart.stale-shares.name'),
+        }, {
+          name: this.snippetService.getSnippet('my-farmer-component.shares-chart.valid-shares.name'),
         }, {
           name: this.snippetService.getSnippet('my-farmer-component.shares-chart.difficulty.name'),
         }, {
@@ -296,6 +321,8 @@ export class MyFarmerComponent implements OnInit {
 
   private makeSharesChartUpdateOptions(historicalStats): EChartsOption {
     const historicalSharesSeries = historicalStats.map(stats => [stats.createdAt, stats.shares]);
+    const historicalStaleSharesSeries = historicalStats.map(stats => [stats.createdAt, stats.staleShares || 0]);
+    const historicalInvalidSharesSeries = historicalStats.map(stats => [stats.createdAt, stats.invalidShares || 0]);
     const historicalShareCountSeries = historicalStats.map(stats => [stats.createdAt, stats.shareCount]);
     const historicalDifficultySeries = historicalStats.map(stats => [stats.createdAt, stats.difficulty]);
     const lastDate = historicalStats.length > 0 ? historicalStats[0].createdAt : new Date();
@@ -327,6 +354,10 @@ export class MyFarmerComponent implements OnInit {
 
     return {
       series: [{
+        data: missingSharesDataLeading.concat(historicalInvalidSharesSeries, missingSharesDataTrailing),
+      }, {
+        data: missingSharesDataLeading.concat(historicalStaleSharesSeries, missingSharesDataTrailing),
+      }, {
         data: missingSharesDataLeading.concat(historicalSharesSeries, missingSharesDataTrailing),
       }, {
         data: missingDifficultyDataLeading.concat(historicalDifficultySeries, missingDifficultyDataTrailing),
