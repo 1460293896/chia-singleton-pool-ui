@@ -116,9 +116,6 @@ export class StatsService {
     if (accountStats.topAccounts) {
       accountStats.topAccounts.forEach(account => {
         account.pendingRounded = (new BigNumber(account.pending)).decimalPlaces(12, BigNumber.ROUND_FLOOR).toNumber();
-        if (account.collateral) {
-          account.collateralRounded = (new BigNumber(account.collateral)).decimalPlaces(12, BigNumber.ROUND_FLOOR).toNumber();
-        }
       });
     }
     this.accountStats.next(accountStats);

@@ -117,8 +117,9 @@ export class AccountService {
     return accountHistoricalStats;
   }
 
-  patchAccount(account) {
-    account.pendingRounded = (new BigNumber(account.pending)).decimalPlaces(12, BigNumber.ROUND_FLOOR).toNumber();
+  patchAccount(account): void {
+    account.pendingBN = new BigNumber(account.pending);
+    account.pendingRounded = account.pendingBN.decimalPlaces(12, BigNumber.ROUND_FLOOR).toNumber();
   }
 
   get authToken() {
