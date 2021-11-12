@@ -14,13 +14,16 @@ import {BehaviorSubject} from 'rxjs';
 })
 export class AccountService {
   public static singletonGenesisStorageKey = 'singletonGenesis';
-  public static authTokenStorageKey = 'authToken';
+  public static authTokenStorageKey = (singletonGenesis: string): string => `authToken:${singletonGenesis}`;
 
   public account = null;
   public accountHistoricalStats = new BehaviorSubject<any[]>([]);
   public isLoading = false;
   public isAuthenticating = false;
   public isUpdatingAccount = false;
+  public isMyFarmerPage = true;
+
+  private _singletonGenesis: string = null;
 
   constructor(
     private statsService: StatsService,
@@ -28,17 +31,41 @@ export class AccountService {
     private localStorageService: LocalStorageService,
     private toastService: ToastService,
     private snippetService: SnippetService,
-  ) {}
+  ) {
+    this.migrateLegacyConfig();
+    this.singletonGenesis = this.singletonGenesisFromLocalStorage;
+  }
 
-  async login({ singletonGenesis }) {
+  get singletonGenesis(): string {
+    return this._singletonGenesis;
+  }
+
+  set singletonGenesis(value: string) {
+    this._singletonGenesis = value;
+    if (value) {
+      Sentry.setUser({ id: value });
+    } else {
+      Sentry.setUser(null);
+    }
+  }
+
+  get singletonGenesisFromLocalStorage(): string {
+    return this.localStorageService.getItem(AccountService.singletonGenesisStorageKey);
+  }
+
+  get authToken(): string {
+    return this.localStorageService.getItem(AccountService.authTokenStorageKey(this.singletonGenesis));
+  }
+
+  async login({ singletonGenesis }): Promise<boolean> {
     singletonGenesis = singletonGenesis.trim();
     const account = await this.getAccount({ accountIdentifier: singletonGenesis });
     if (account === null) {
       this.toastService.showErrorToast(this.snippetService.getSnippet('account-service.login.error.invalid-farmer', singletonGenesis));
       return false;
     }
-    this.localStorageService.setItem(AccountService.singletonGenesisStorageKey, singletonGenesis);
-    Sentry.setUser({ id: singletonGenesis });
+    this.setSingletonGenesisInLocalStorage(singletonGenesis);
+    this.singletonGenesis = singletonGenesis;
     await this.updateAccount();
     await this.updateAccountHistoricalStats();
     this.toastService.showSuccessToast(this.snippetService.getSnippet('account-service.login.success'));
@@ -46,37 +73,66 @@ export class AccountService {
     return true;
   }
 
-  logout() {
-    this.removeSingletonGenesis();
-    this.removeAuthToken();
-    this.account = null;
-    this.accountHistoricalStats.next([]);
-    Sentry.setUser(null);
+  logout(): void {
+    this.removeAuthTokenFromLocalStorage();
+    if (!this.isExternalSingletonGenesis) {
+      this.removeSingletonGenesisFromLocalStorage();
+      this.clearStats();
+    }
     this.toastService.showSuccessToast(this.snippetService.getSnippet('account-service.logout.success'));
   }
 
-  get singletonGenesis() {
-    return this.localStorageService.getItem(AccountService.singletonGenesisStorageKey);
+  clearStats(): void {
+    this.singletonGenesis = null;
+    this.account = null;
+    this.accountHistoricalStats.next([]);
   }
 
-  removeSingletonGenesis() {
+  removeSingletonGenesisFromLocalStorage(): void {
     this.localStorageService.removeItem(AccountService.singletonGenesisStorageKey);
   }
 
-  get haveSingletonGenesis() {
+  setSingletonGenesisInLocalStorage(singletonGenesis: string): void {
+    this.localStorageService.setItem(AccountService.singletonGenesisStorageKey, singletonGenesis);
+  }
+
+  setAuthTokenInLocalStorage(authToken: string): void {
+    this.localStorageService.setItem(AccountService.authTokenStorageKey(this.singletonGenesis), authToken);
+  }
+
+  removeAuthTokenFromLocalStorage(): void {
+    this.localStorageService.removeItem(AccountService.authTokenStorageKey(this.singletonGenesis));
+  }
+
+  get haveSingletonGenesis(): boolean {
     return !!this.singletonGenesis;
   }
 
-  get haveAccount() {
+  get haveAccount(): boolean {
     return this.account !== null;
+  }
+
+  get haveAuthToken(): boolean {
+    return !!this.authToken;
+  }
+
+  get isAuthenticated(): boolean {
+    return this.haveSingletonGenesis && this.haveAuthToken;
+  }
+
+  get isExternalSingletonGenesis(): boolean {
+    return this.singletonGenesis !== this.singletonGenesisFromLocalStorage;
   }
 
   async updateAccount() {
     this.account = await this.getAccount({ accountIdentifier: this.singletonGenesis });
     if (!this.haveAccount) {
-      this.removeSingletonGenesis();
-      this.removeAuthToken();
+      if (this.isMyFarmerPage) {
+        this.removeAuthTokenFromLocalStorage();
+        this.removeSingletonGenesisFromLocalStorage();
+      }
       this.accountHistoricalStats.next([]);
+      this.toastService.showErrorToast(this.snippetService.getSnippet('account-service.login.error.invalid-farmer', this.singletonGenesis));
     }
   }
 
@@ -122,18 +178,6 @@ export class AccountService {
     account.pendingRounded = account.pendingBN.decimalPlaces(12, BigNumber.ROUND_FLOOR).toNumber();
   }
 
-  get authToken() {
-    return this.localStorageService.getItem(AccountService.authTokenStorageKey);
-  }
-
-  get haveAuthToken() {
-    return !!this.authToken;
-  }
-
-  removeAuthToken() {
-    this.localStorageService.removeItem(AccountService.authTokenStorageKey);
-  }
-
   async authenticate({ signature, message }) {
     if (!this.haveSingletonGenesis) {
       return;
@@ -145,14 +189,14 @@ export class AccountService {
         signature,
         message,
       });
-      this.localStorageService.setItem(AccountService.authTokenStorageKey, accessToken);
+      this.setAuthTokenInLocalStorage(accessToken);
     } finally {
       this.isAuthenticating = false;
     }
   }
 
   async updateName({ newName }) {
-    if (!this.haveAuthToken) {
+    if (!this.isAuthenticated) {
       return;
     }
     this.isUpdatingAccount = true;
@@ -169,7 +213,7 @@ export class AccountService {
   }
 
   async updateMinimumPayout({ newMinimumPayout }) {
-    if (!this.haveAuthToken) {
+    if (!this.isAuthenticated) {
       return;
     }
     this.isUpdatingAccount = true;
@@ -182,6 +226,14 @@ export class AccountService {
       await this.updateAccount();
     } finally {
       this.isUpdatingAccount = false;
+    }
+  }
+
+  private migrateLegacyConfig() {
+    const legacyAuthToken = this.localStorageService.getItem('authToken');
+    if (legacyAuthToken) {
+      this.localStorageService.setItem(AccountService.authTokenStorageKey(this.singletonGenesisFromLocalStorage), legacyAuthToken);
+      this.localStorageService.removeItem('authToken');
     }
   }
 }

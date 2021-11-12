@@ -151,6 +151,8 @@ export default {
   'routing.title-prefix.payouts': 'Payouts',
   'routing.title-prefix.settings': 'Settings',
   'routing.title-prefix.top-accounts': 'Top Accounts',
+  'routing.title-prefix.my-farmer': 'My Farmer',
+  'routing.title-prefix.farmer': 'Farmer',
   'stats-card-component.average-effort': 'Average Effort',
   'stats-card-component.average-effort.help': 'The average effort is the pools effort calculated over the past 7 days based on actual vs. expected block wins. Lower than 100% is lucky, around 100% is normal and above 100% is unlucky.',
   'stats-card-component.daily-reward': 'Daily Reward',

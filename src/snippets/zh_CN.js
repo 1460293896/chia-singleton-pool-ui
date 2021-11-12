@@ -151,6 +151,8 @@ export default {
   'routing.title-prefix.payouts': '赔付',
   'routing.title-prefix.settings': '设置',
   'routing.title-prefix.top-accounts': '热门账户',
+  'routing.title-prefix.my-farmer': '我的农夫',
+  'routing.title-prefix.farmer': '农民',
   'stats-card-component.average-effort': '平均努力',
   'stats-card-component.average-effort.help': '平均努力是指在过去7天内，根据实际与预期的区块胜率计算出的池子努力。低于100%是幸运的，100%左右是正常的，高于100%是不幸运的。',
   'stats-card-component.daily-reward': '每日奖励',

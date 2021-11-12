@@ -1,6 +1,5 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {faCircleNotch, faUserCheck, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
-import * as Sentry from '@sentry/angular';
 import * as moment from 'moment';
 import BigNumber from 'bignumber.js';
 import {EChartsOption, graphic} from 'echarts';
@@ -21,7 +20,7 @@ import {RatesService} from '../rates.service';
   templateUrl: './my-farmer.component.html',
   styleUrls: ['./my-farmer.component.scss']
 })
-export class MyFarmerComponent implements OnInit {
+export class MyFarmerComponent implements OnInit, OnDestroy {
   @ViewChild(UpdateNameModalComponent) updateNameModal;
   @ViewChild(UpdateMinimumPayoutModalComponent) updateMinimumPayoutModal;
 
@@ -201,6 +200,19 @@ export class MyFarmerComponent implements OnInit {
         },
       }],
     };
+
+    this.activatedRoute.params.subscribe(params => {
+      if (params.singletonGenesis) {
+        this.accountService.singletonGenesis = params.singletonGenesis;
+        this.accountService.isMyFarmerPage = false;
+      } else {
+        this.accountService.isMyFarmerPage = true;
+        if (this.accountService.singletonGenesis !== this.accountService.singletonGenesisFromLocalStorage) {
+          this.accountService.singletonGenesis = this.accountService.singletonGenesisFromLocalStorage;
+        }
+      }
+    });
+
     this.accountService.accountHistoricalStats.subscribe(historicalStats => {
       this.ecChartUpdateOptions = this.makeEcChartUpdateOptions(historicalStats);
       this.sharesChartUpdateOptions = this.makeSharesChartUpdateOptions(historicalStats);
@@ -242,6 +254,14 @@ export class MyFarmerComponent implements OnInit {
         }],
       };
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.accountService.isMyFarmerPage) {
+      return;
+    }
+
+    this.accountService.clearStats();
   }
 
   private get shareChartTopMargin(): number {
@@ -287,8 +307,15 @@ export class MyFarmerComponent implements OnInit {
     if (!this.accountService.haveSingletonGenesis) {
       return;
     }
-    Sentry.setUser({ id: this.accountService.singletonGenesis });
     await this.accountService.updateAccount();
+    if (!this.accountService.haveAccount) {
+      if (!this.accountService.isMyFarmerPage) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await this.router.navigate(['/']);
+      }
+
+      return;
+    }
     await this.accountService.updateAccountHistoricalStats();
   }
 

@@ -151,6 +151,8 @@ export default {
   'routing.title-prefix.payouts': 'Auszahlungen',
   'routing.title-prefix.settings': 'Einstellungen',
   'routing.title-prefix.top-accounts': 'Top Konten',
+  'routing.title-prefix.my-farmer': 'Mein Farmer',
+  'routing.title-prefix.farmer': 'Farmer',
   'stats-card-component.average-effort': 'Mittlerer Aufwand',
   'stats-card-component.average-effort.help': 'Der mittlere Aufwand ist der Poolaufwand, der über die letzten 7 Tage auf der Grundlage der tatsächlichen gegenüber den erwarteten Blockgewinnen berechnet wird. Weniger als 100 % ist Glück, etwa 100 % ist normal und mehr als 100 % ist Pech.',
   'stats-card-component.daily-reward': 'Tägliche Belohnung',
