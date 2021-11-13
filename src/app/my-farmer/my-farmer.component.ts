@@ -214,13 +214,6 @@ export class MyFarmerComponent implements OnInit, OnDestroy {
         }
       }
     });
-
-    this.accountService.accountHistoricalStats
-      .pipe(throttle(() => interval(500), { trailing: true }))
-      .subscribe(historicalStats => {
-        this.ecChartUpdateOptions = this.makeEcChartUpdateOptions(historicalStats);
-        this.sharesChartUpdateOptions = this.makeSharesChartUpdateOptions(historicalStats);
-      });
   }
 
   ngOnDestroy(): void {
@@ -254,6 +247,14 @@ export class MyFarmerComponent implements OnInit, OnDestroy {
     this.statsService.rewardStats.asObservable().subscribe(async rewardStats => {
       this.dailyRewardPerPib = rewardStats.dailyRewardPerPiB;
     });
+
+    this.accountService.accountHistoricalStats
+      .pipe(throttle(() => interval(500), { trailing: true }))
+      .subscribe(historicalStats => {
+        this.ecChartUpdateOptions = this.makeEcChartUpdateOptions(historicalStats);
+        this.sharesChartUpdateOptions = this.makeSharesChartUpdateOptions(historicalStats);
+      });
+
     setInterval(async () => {
       if (!this.accountService.haveSingletonGenesis) {
         return;
