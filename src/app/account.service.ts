@@ -73,10 +73,10 @@ export class AccountService {
     return true;
   }
 
-  async doesAccountExist({ poolPublicKey }) {
-    const account = await this.getAccount({ poolPublicKey });
+  async doesAccountExist({ singletonGenesis }) {
+    const account = await this.getAccount({ accountIdentifier: singletonGenesis });
     if (account === null) {
-      this.toastService.showErrorToast(this.snippetService.getSnippet('account-service.login.error.invalid-farmer', poolPublicKey));
+      this.toastService.showErrorToast(this.snippetService.getSnippet('account-service.login.error.invalid-farmer', singletonGenesis));
 
       return false;
     }

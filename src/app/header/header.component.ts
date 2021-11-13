@@ -58,7 +58,7 @@ export class HeaderComponent implements OnInit {
     if (!this.accountSearchInput) {
       return;
     }
-    if (await this.accountService.doesAccountExist({ poolPublicKey: this.accountSearchInput })) {
+    if (await this.accountService.doesAccountExist({ singletonGenesis: this.accountSearchInput })) {
       await this.router.navigate([`/farmer/${this.accountSearchInput}`]);
       this.accountSearchInput = '';
     }
