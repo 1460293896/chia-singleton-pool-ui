@@ -46,9 +46,6 @@
   display: inline-block;
 }
 .currency-select {
-  background-color: #262629;
-  color: #cfd0d1;
-  border-color: #6c757d;
   scrollbar-width: thin;
   scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
 }
@@ -65,4 +62,25 @@
 }
 .currency-select-option {
   background-color: #262629;
+}
+.dark-background {
+  background-color: #262629;
+  color: #cfd0d1;
+  border-color: #6c757d;
+}
+.logout-button:hover{
+  color:#fff;
+  background-color:#dc3545;
+  border-color:#dc3545
+}
+.other-pools-button:hover{
+  color:#212529;
+  background-color:#f8f9fa;
+  border-color:#f8f9fa
+}
+.search-button{
+  cursor: pointer;
+}
+.search-input {
+  max-width: 16em;
 }

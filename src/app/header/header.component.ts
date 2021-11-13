@@ -4,6 +4,8 @@ import {SnippetService} from '../snippet.service';
 import {PoolsProvider} from '../pools.provider';
 import {AccountService} from '../account.service';
 import {RatesService} from '../rates.service';
+import {Router} from '@angular/router';
+import {faSearch} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-header',
@@ -16,6 +18,8 @@ export class HeaderComponent implements OnInit {
   private _poolStats:any = {};
 
   public isMenuCollapsed = true;
+  public accountSearchInput = '';
+  public searchIcon = faSearch;
 
   constructor(
     public accountService: AccountService,
@@ -23,6 +27,7 @@ export class HeaderComponent implements OnInit {
     private _snippetService: SnippetService,
     private poolsProvider: PoolsProvider,
     public ratesService: RatesService,
+    private router: Router,
   ) {}
 
   get showLogoutButton(): boolean {
@@ -46,6 +51,17 @@ export class HeaderComponent implements OnInit {
     this.statsService.poolStats.asObservable().subscribe((poolStats => this.poolStats = poolStats));
     this.poolConfig = this.statsService.poolConfig.getValue();
     this.poolStats = this.statsService.poolStats.getValue();
+  }
+
+  async search() {
+    this.accountSearchInput = this.accountSearchInput.trim();
+    if (!this.accountSearchInput) {
+      return;
+    }
+    if (await this.accountService.doesAccountExist({ poolPublicKey: this.accountSearchInput })) {
+      await this.router.navigate([`/farmer/${this.accountSearchInput}`]);
+      this.accountSearchInput = '';
+    }
   }
 
   onTabButtonClick() {
