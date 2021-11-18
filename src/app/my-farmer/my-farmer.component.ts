@@ -202,7 +202,7 @@ export class MyFarmerComponent implements OnInit, OnDestroy {
       }],
     };
 
-    this.activatedRoute.params.subscribe(params => {
+    this.activatedRoute.params.subscribe(async params => {
       if (params.singletonGenesis) {
         this.accountService.singletonGenesis = params.singletonGenesis;
         this.accountService.isMyFarmerPage = false;
@@ -212,6 +212,7 @@ export class MyFarmerComponent implements OnInit, OnDestroy {
           this.accountService.singletonGenesis = this.accountService.singletonGenesisFromLocalStorage;
         }
       }
+      await this.initAccount();
     });
 
     this.accountService.accountHistoricalStats
@@ -260,6 +261,9 @@ export class MyFarmerComponent implements OnInit, OnDestroy {
       await this.loginAndAuthFromQueryParams();
       await this.router.navigate([]);
     }
+  }
+
+  private async initAccount() {
     if (!this.accountService.haveSingletonGenesis) {
       return;
     }
