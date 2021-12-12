@@ -16,7 +16,7 @@ export class AccountService {
   public static singletonGenesisStorageKey = 'singletonGenesis';
   public static authTokenStorageKey = (singletonGenesis: string): string => `authToken:${singletonGenesis}`;
 
-  public account = null;
+  public accountSubject = new BehaviorSubject<any>(null);
   public accountHistoricalStats = new BehaviorSubject<any[]>([]);
   public isLoading = false;
   public isAuthenticating = false;
@@ -34,6 +34,14 @@ export class AccountService {
   ) {
     this.migrateLegacyConfig();
     this.singletonGenesis = this.singletonGenesisFromLocalStorage;
+  }
+
+  get account(): any {
+    return this.accountSubject.getValue();
+  }
+
+  set account(account: any) {
+    this.accountSubject.next(account);
   }
 
   get singletonGenesis(): string {
