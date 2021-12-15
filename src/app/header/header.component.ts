@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import {StatsService} from '../stats.service';
 import {SnippetService} from '../snippet.service';
 import {PoolsProvider} from '../pools.provider';
@@ -6,13 +6,15 @@ import {AccountService} from '../account.service';
 import {RatesService} from '../rates.service';
 import {Router} from '@angular/router';
 import {faSearch} from '@fortawesome/free-solid-svg-icons';
+import {ConfigService} from '../config.service';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnDestroy {
 
   private _poolConfig:any = {};
   private _poolStats:any = {};
@@ -21,14 +23,24 @@ export class HeaderComponent implements OnInit {
   public accountSearchInput = '';
   public searchIcon = faSearch;
 
+  private subscriptions: Subscription[] = [
+    this.statsService.poolConfig.asObservable().subscribe((poolConfig => this.poolConfig = poolConfig)),
+    this.statsService.poolStats.asObservable().subscribe((poolStats => this.poolStats = poolStats)),
+  ];
+
   constructor(
     public accountService: AccountService,
     private statsService: StatsService,
     private _snippetService: SnippetService,
     private poolsProvider: PoolsProvider,
     public ratesService: RatesService,
+    public configService: ConfigService,
     private router: Router,
   ) {}
+
+  public ngOnDestroy(): void {
+    this.subscriptions.map(subscription => subscription.unsubscribe());
+  }
 
   get showLogoutButton(): boolean {
     if (!this.accountService.isMyFarmerPage) {
@@ -44,13 +56,6 @@ export class HeaderComponent implements OnInit {
 
   get snippetService(): SnippetService {
     return this._snippetService;
-  }
-
-  ngOnInit() {
-    this.statsService.poolConfig.asObservable().subscribe((poolConfig => this.poolConfig = poolConfig));
-    this.statsService.poolStats.asObservable().subscribe((poolStats => this.poolStats = poolStats));
-    this.poolConfig = this.statsService.poolConfig.getValue();
-    this.poolStats = this.statsService.poolStats.getValue();
   }
 
   async search() {

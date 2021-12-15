@@ -1,47 +1,49 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy} from '@angular/core';
 import {StatsService} from '../stats.service';
 import * as moment from 'moment';
 import Capacity from '../capacity';
 import {SnippetService} from '../snippet.service';
-import {faCubes} from '@fortawesome/free-solid-svg-icons';
+import {faCubes, faExchangeAlt} from '@fortawesome/free-solid-svg-icons';
 import {getEffortColor} from '../util';
 import BigNumber from 'bignumber.js';
+import {ConfigService, DateFormatting} from '../config.service';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-blocks-won',
   templateUrl: './blocks-won.component.html',
   styleUrls: ['./blocks-won.component.scss']
 })
-export class BlocksWonComponent implements OnInit {
+export class BlocksWonComponent implements OnDestroy {
 
   @Input() limit: number|null = null;
   private _poolConfig:any = {};
   private _poolStats:any = {};
-  private _exchangeStats:any = {};
   public rewardStats:any = {};
 
   public faCubes = faCubes;
+  public faExchangeAlt = faExchangeAlt;
   public page = 1;
   public pageSize = 25;
+
+  private subscriptions: Subscription[] = [
+    this.statsService.poolConfig.asObservable().subscribe((poolConfig => this.poolConfig = poolConfig)),
+    this.statsService.poolStats.asObservable().subscribe((poolStats => this.poolStats = poolStats)),
+    this.statsService.rewardStats.asObservable().subscribe((rewardStats => this.rewardStats = rewardStats)),
+  ];
 
   constructor(
     private statsService: StatsService,
     private _snippetService: SnippetService,
+    private configService: ConfigService,
   ) {}
+
+  public ngOnDestroy(): void {
+    this.subscriptions.map(subscription => subscription.unsubscribe());
+  }
 
   get snippetService(): SnippetService {
     return this._snippetService;
-  }
-
-  ngOnInit() {
-    this.statsService.poolConfig.asObservable().subscribe((poolConfig => this.poolConfig = poolConfig));
-    this.statsService.poolStats.asObservable().subscribe((poolStats => this.poolStats = poolStats));
-    this.statsService.rewardStats.asObservable().subscribe((rewardStats => this.rewardStats = rewardStats));
-    this.statsService.exchangeStats.asObservable().subscribe((exchangeStats => this.exchangeStats = exchangeStats));
-    this.poolConfig = this.statsService.poolConfig.getValue();
-    this.poolStats = this.statsService.poolStats.getValue();
-    this.rewardStats = this.statsService.rewardStats.getValue();
-    this.exchangeStats = this.statsService.exchangeStats.getValue();
   }
 
   get dr() {
@@ -62,10 +64,6 @@ export class BlocksWonComponent implements OnInit {
 
   get distributionRatiosLength() {
     return this.distributionRatios.length;
-  }
-
-  set exchangeStats(value: any) {
-    this._exchangeStats = value;
   }
 
   set poolConfig(poolConfig) {
@@ -107,8 +105,12 @@ export class BlocksWonComponent implements OnInit {
     return recentlyWonBlocks;
   }
 
-  getBlockDate(block) {
-    return moment(block.createdAt).format('YYYY-MM-DD HH:mm');
+  getBlockDate(block): string {
+    if (this.configService.wonBlockDateFormatting === DateFormatting.fixed) {
+      return moment(block.createdAt).format('YYYY-MM-DD HH:mm');
+    } else {
+      return moment(block.createdAt).fromNow();
+    }
   }
 
   getFormattedCapacityFromTiB(capacityInTiB) {
@@ -188,5 +190,13 @@ export class BlocksWonComponent implements OnInit {
 
   trackBy(index, block) {
     return block.hash;
+  }
+
+  public toggleDateFormatting(): void {
+    if (this.configService.wonBlockDateFormatting === DateFormatting.fixed) {
+      this.configService.wonBlockDateFormatting = DateFormatting.relative;
+    } else {
+      this.configService.wonBlockDateFormatting = DateFormatting.fixed;
+    }
   }
 }

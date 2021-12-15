@@ -1,18 +1,20 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {StatsService} from '../stats.service';
 import * as moment from 'moment';
 import {SnippetService} from '../snippet.service';
-import {faMoneyCheckAlt} from '@fortawesome/free-solid-svg-icons';
+import {faMoneyCheckAlt, faExchangeAlt} from '@fortawesome/free-solid-svg-icons';
 import {BigNumber} from 'bignumber.js';
 import {PoolsProvider} from '../pools.provider';
 import {ensureHexPrefix} from '../util';
+import {ConfigService, DateFormatting} from '../config.service';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-payouts',
   templateUrl: './payouts.component.html',
   styleUrls: ['./payouts.component.scss']
 })
-export class PayoutsComponent implements OnInit {
+export class PayoutsComponent implements OnDestroy {
 
   @Input() limit: number|null = null;
   private _poolConfig:any = {};
@@ -22,24 +24,27 @@ export class PayoutsComponent implements OnInit {
   private addressAmountPairs: any = {};
 
   public faMoneyCheck = faMoneyCheckAlt;
+  public faExchangeAlt = faExchangeAlt;
+
+  private subscriptions: Subscription[] = [
+    this.statsService.poolConfig.asObservable().subscribe((poolConfig => this.poolConfig = poolConfig)),
+    this.statsService.poolStats.asObservable().subscribe((poolStats => this.poolStats = poolStats)),
+    this.statsService.lastPayouts.asObservable().subscribe((lastPayouts => this.lastPayouts = lastPayouts)),
+  ];
 
   constructor(
     private statsService: StatsService,
     private _snippetService: SnippetService,
-    private poolsProvider: PoolsProvider
+    private poolsProvider: PoolsProvider,
+    private configService: ConfigService,
   ) {}
+
+  public ngOnDestroy(): void {
+    this.subscriptions.map(subscription => subscription.unsubscribe());
+  }
 
   get snippetService(): SnippetService {
     return this._snippetService;
-  }
-
-  ngOnInit() {
-    this.statsService.poolConfig.asObservable().subscribe((poolConfig => this.poolConfig = poolConfig));
-    this.statsService.poolStats.asObservable().subscribe((poolStats => this.poolStats = poolStats));
-    this.statsService.lastPayouts.asObservable().subscribe((lastPayouts => this.lastPayouts = lastPayouts));
-    this.poolConfig = this.statsService.poolConfig.getValue();
-    this.poolStats = this.statsService.poolStats.getValue();
-    this.lastPayouts = this.statsService.lastPayouts.getValue();
   }
 
   set poolConfig(poolConfig) {
@@ -69,8 +74,12 @@ export class PayoutsComponent implements OnInit {
     return this.lastPayouts.slice(0, this.limit);
   }
 
-  getPayoutDate(payout) {
-    return moment(payout.createdAt).format('YYYY-MM-DD HH:mm');
+  getPayoutDate(payout): string {
+    if (this.configService.payoutDateFormatting === DateFormatting.fixed) {
+      return moment(payout.createdAt).format('YYYY-MM-DD HH:mm');
+    } else {
+      return moment(payout.createdAt).fromNow();
+    }
   }
 
   getTotalPayout(transactions) {
@@ -142,5 +151,13 @@ export class PayoutsComponent implements OnInit {
 
   trackPayoutBy(index, payout) {
     return payout._id;
+  }
+
+  public toggleDateFormatting(): void {
+    if (this.configService.payoutDateFormatting === DateFormatting.fixed) {
+      this.configService.payoutDateFormatting = DateFormatting.relative;
+    } else {
+      this.configService.payoutDateFormatting = DateFormatting.fixed;
+    }
   }
 }
