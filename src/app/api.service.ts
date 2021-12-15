@@ -63,6 +63,12 @@ export class ApiService {
     return data;
   }
 
+  async getAccountWonBlocks({ poolIdentifier, accountIdentifier }) {
+    const { data } = await this.client.get(`${poolIdentifier}/account/${accountIdentifier}/won-blocks`);
+
+    return data;
+  }
+
   async authenticateAccount({ poolIdentifier, accountIdentifier, message, signature }) {
     const { data } = await this.client.post(`${poolIdentifier}/account/${accountIdentifier}/authenticate`, {
       message,

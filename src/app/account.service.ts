@@ -8,6 +8,7 @@ import {BigNumber} from 'bignumber.js';
 import {SnippetService} from './snippet.service';
 import * as Sentry from '@sentry/angular';
 import {BehaviorSubject} from 'rxjs';
+import {WonBlock} from './farmer-won-blocks/farmer-won-blocks.component';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,7 @@ export class AccountService {
 
   public accountSubject = new BehaviorSubject<any>(null);
   public accountHistoricalStats = new BehaviorSubject<any[]>([]);
+  public accountWonBlocks = new BehaviorSubject<WonBlock[]>([]);
   public isLoading = false;
   public isAuthenticating = false;
   public isUpdatingAccount = false;
@@ -75,7 +77,10 @@ export class AccountService {
     this.setSingletonGenesisInLocalStorage(singletonGenesis);
     this.singletonGenesis = singletonGenesis;
     await this.updateAccount();
-    await this.updateAccountHistoricalStats();
+    await Promise.all([
+      this.updateAccountHistoricalStats(),
+      this.updateAccountWonBlocks(),
+    ]);
     this.toastService.showSuccessToast(this.snippetService.getSnippet('account-service.login.success'));
 
     return true;
@@ -105,6 +110,7 @@ export class AccountService {
     this.singletonGenesis = null;
     this.account = null;
     this.accountHistoricalStats.next([]);
+    this.accountWonBlocks.next([]);
   }
 
   removeSingletonGenesisFromLocalStorage(): void {
@@ -151,12 +157,17 @@ export class AccountService {
         this.removeSingletonGenesisFromLocalStorage();
       }
       this.accountHistoricalStats.next([]);
+      this.accountWonBlocks.next([]);
       this.toastService.showErrorToast(this.snippetService.getSnippet('account-service.login.error.invalid-farmer', this.singletonGenesis));
     }
   }
 
   async updateAccountHistoricalStats() {
     this.accountHistoricalStats.next(await this.getAccountHistoricalStats({ accountIdentifier: this.singletonGenesis }));
+  }
+
+  async updateAccountWonBlocks() {
+    this.accountWonBlocks.next(await this.getAccountWonBlocks({ accountIdentifier: this.singletonGenesis }));
   }
 
   async getAccount({ accountIdentifier }) {
@@ -190,6 +201,18 @@ export class AccountService {
     }
 
     return accountHistoricalStats;
+  }
+
+  private async getAccountWonBlocks({ accountIdentifier }) {
+    this.isLoading = true;
+    let accountWonBlocks = [];
+    try {
+      accountWonBlocks = await this.statsService.getAccountWonBlocks({ accountIdentifier });
+    } finally {
+      this.isLoading = false;
+    }
+
+    return accountWonBlocks;
   }
 
   patchAccount(account): void {

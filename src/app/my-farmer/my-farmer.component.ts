@@ -5,7 +5,7 @@ import BigNumber from 'bignumber.js';
 import {EChartsOption, graphic} from 'echarts';
 import {ActivatedRoute, Router} from '@angular/router';
 import {distinctUntilChanged, map, skip} from 'rxjs/operators';
-import {combineLatest, Subscription} from 'rxjs';
+import {combineLatest, Observable, Subscription} from 'rxjs';
 
 import {StatsService} from '../stats.service';
 import {ToastService} from '../toast.service';
@@ -42,6 +42,13 @@ export class MyFarmerComponent implements OnInit, OnDestroy {
 
   public isLoadingPayoutHistory = true;
   public recentPayouts: Payout[] = [];
+
+  public isAccountLoading: Observable<boolean> = this.accountService.accountSubject
+    .asObservable()
+    .pipe(
+      map(account => !account || !account.payoutAddress),
+      distinctUntilChanged()
+    );
 
   private poolEc = 0;
   private dailyRewardPerPib = 0;
@@ -312,6 +319,12 @@ export class MyFarmerComponent implements OnInit, OnDestroy {
       }
       await this.accountService.updateAccountHistoricalStats();
     }, (this.historicalIntervalInMinutes + 1) * 60 * 1000);
+    setInterval(async () => {
+      if (!this.accountService.haveSingletonGenesis) {
+        return;
+      }
+      await this.accountService.updateAccountWonBlocks();
+    }, 11 * 60 * 1000);
 
     if (this.isLoginRequest()) {
       await this.loginAndAuthFromQueryParams();
@@ -332,7 +345,10 @@ export class MyFarmerComponent implements OnInit, OnDestroy {
 
       return;
     }
-    await this.accountService.updateAccountHistoricalStats();
+    await Promise.all([
+      this.accountService.updateAccountHistoricalStats(),
+      this.accountService.updateAccountWonBlocks(),
+    ]);
   }
 
   private get shareChartTopMargin(): number {
