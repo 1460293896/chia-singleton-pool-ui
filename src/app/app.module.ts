@@ -31,6 +31,7 @@ import {NgxEchartsModule} from 'ngx-echarts';
 import { PoolHistoryComponent } from './pool-history/pool-history.component';
 import { FarmerPayoutHistoryComponent } from './farmer-payout-history/farmer-payout-history.component';
 import { FarmerWonBlocksComponent } from './farmer-won-blocks/farmer-won-blocks.component';
+import { CurrencySelectorComponent } from './currency-selector/currency-selector.component';
 
 @NgModule({
   declarations: [
@@ -50,6 +51,7 @@ import { FarmerWonBlocksComponent } from './farmer-won-blocks/farmer-won-blocks.
     PoolHistoryComponent,
     FarmerPayoutHistoryComponent,
     FarmerWonBlocksComponent,
+    CurrencySelectorComponent,
   ],
   imports: [
     BrowserModule,
