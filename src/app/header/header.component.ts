@@ -112,7 +112,7 @@ export class HeaderComponent implements OnDestroy {
       return [];
     }
 
-    return this.poolsProvider.pools.filter(pool => pool.url !== this.poolUrl).filter(pool => !pool.hidden);
+    return this.poolsProvider.pools.filter(pool => pool.url !== this.poolUrl);
   }
 
   getPool(index) {
